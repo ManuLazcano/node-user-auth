@@ -1,4 +1,5 @@
 import DBLocal from 'db-local'
+import crypto from 'crypto'
 
 const { Schema } = new DBLocal({ path: './db' })
 
@@ -15,6 +16,18 @@ export class UserRepository {
 
     if (typeof password !== 'string') throw new Error('Password must be a string')
     if (password.length < 6) throw new Error('Password must be at least 6 characteres long')
+
+    const user = User.findOne({ username })
+    if (user) throw new Error('Username already exists')
+
+    const id = crypto.randomUUID()
+    User.create({
+      _id: id,
+      username,
+      password
+    }).save()
+
+    return id
   }
 
   static login ({ username, password }) {}
