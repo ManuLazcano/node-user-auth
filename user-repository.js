@@ -17,9 +17,7 @@ export class UserRepository {
   static async create ({ username, password }) {
     Validate.username(username)
     Validate.password(password)
-
-    const user = User.findOne({ username })
-    if (user) throw new Error('Username already exists')
+    Validate.account({ username, mustExist: false })
 
     const id = crypto.randomUUID()
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
@@ -36,11 +34,11 @@ export class UserRepository {
   static async login ({ username, password }) {
     Validate.username(username)
     Validate.password(password)
+    Validate.account({ username, mustExist: true })
 
     const user = User.findOne({ username })
-    if (!user) throw new Error('Username does not exist')
-
     const isValid = await bcrypt.compare(password, user.password)
+
     if (!isValid) throw new Error('Passowrd is invalid')
 
     return user
@@ -56,5 +54,12 @@ class Validate {
   static password (password) {
     if (typeof password !== 'string') throw new Error('Password must be a string')
     if (password.length < 6) throw new Error('Password must be at least 6 characteres long')
+  }
+
+  static account ({ username, mustExist }) {
+    const hasAccount = User.findOne({ username })
+
+    if (mustExist && !hasAccount) throw new Error('Username does not exist')
+    if (!mustExist && hasAccount) throw new Error('Username already exists')
   }
 }
