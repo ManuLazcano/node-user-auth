@@ -41,7 +41,20 @@ export class UserRepository {
 
     if (!isValid) throw new Error('Passowrd is invalid')
 
-    return user
+    /** Omitir propiedades como el password
+     * Opción 1: const { password: _, ...publicUser } = user
+     * Opción 2: crear un objeto desde cero, esta es la opción que se esta implementando
+     *
+     * Ventajas:
+     *  - Opción 1: Es explícito con los campos que no se deben exponer.
+     *  - Opción 2: Es explícito con los campos que se deben exponer. Se asegura que si en el futuro se agrega un
+     *              nuevo campo en la BD, este no se pase por alto y se exponga, como si sucedería en la opción 1.
+     */
+
+    return {
+      id: user._id,
+      username: user.username
+    }
   }
 }
 
